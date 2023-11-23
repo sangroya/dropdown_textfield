@@ -312,7 +312,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           !_textFieldFocusNode.hasFocus &&
           _isExpanded) {
         _isExpanded = !_isExpanded;
-        hideOverlay();
+        // hideOverlay(); //generating the issue with multi selection
         if (!widget.readOnly &&
             widget.singleController?.dropDownValue?.name != _cnt.text) {
           setState(() {
