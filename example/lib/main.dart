@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const TestPage2(),
+      home: const TestPage(),
     );
   }
 }
@@ -158,6 +158,8 @@ class _TestPageState extends State<TestPage> {
                 ),
                 DropDownTextField.multiSelection(
                   // controller: _cntMulti,
+                  enableSearch: true,
+                  submitButtonPadding: EdgeInsets.all(8.0),
                   initialValue: const ["name1", "name2", "name8", "name3"],
                   dropDownList: const [
                     DropDownValueModel(name: 'name1', value: "value1"),
