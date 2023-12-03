@@ -316,7 +316,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           !_textFieldFocusNode.hasFocus &&
           _isExpanded) {
         _isExpanded = !_isExpanded;
-        // if (!widget.isMultiSelection) hideOverlay();
+         if (!widget.isMultiSelection) hideOverlay();
         if (!widget.readOnly &&
             widget.singleController?.dropDownValue?.name != _cnt.text) {
           setState(() {
