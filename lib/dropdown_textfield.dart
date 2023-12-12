@@ -190,7 +190,7 @@ class DropDownTextField extends StatefulWidget {
   final bool isEnabled;
 
   final FormFieldValidator<String>? validator;
-  // if you want to make the selection for initial value based on the value instead of name
+  // if you want to make the selection for initial value based on the value instead of name then set it true
   final initialBasedOnValue;
 
   ///by setting enableSearch=true enable search option in dropdown,as of now this feature enabled only for single selection dropdown
