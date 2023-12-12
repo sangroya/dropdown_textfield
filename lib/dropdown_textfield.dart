@@ -60,6 +60,7 @@ class DropDownTextField extends StatefulWidget {
       this.validator,
       this.isEnabled = true,
       this.enableSearch = false,
+      this.initialBasedOnValue = false,
       this.readOnly = true,
       this.dropdownRadius = 12,
       this.textFieldDecoration,
@@ -110,6 +111,7 @@ class DropDownTextField extends StatefulWidget {
       this.onChanged,
       this.validator,
       required this.enableSearch,
+      this.initialBasedOnValue = false,
       this.isEnabled = true,
       this.dropdownRadius = 12,
       this.dropDownIconProperty,
@@ -188,6 +190,8 @@ class DropDownTextField extends StatefulWidget {
   final bool isEnabled;
 
   final FormFieldValidator<String>? validator;
+  // if you want to make the selection for initial value based on the value instead of name
+  final initialBasedOnValue;
 
   ///by setting enableSearch=true enable search option in dropdown,as of now this feature enabled only for single selection dropdown
   final bool enableSearch;
@@ -316,7 +320,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           !_textFieldFocusNode.hasFocus &&
           _isExpanded) {
         _isExpanded = !_isExpanded;
-         if (!widget.isMultiSelection) hideOverlay();
+        if (!widget.isMultiSelection) hideOverlay();
         if (!widget.readOnly &&
             widget.singleController?.dropDownValue?.name != _cnt.text) {
           setState(() {
@@ -329,14 +333,23 @@ class _DropDownTextFieldState extends State<DropDownTextField>
     for (int i = 0; i < widget.dropDownList.length; i++) {
       _multiSelectionValue.add(false);
     }
+    List<String> initialValueName = [];
 
     ///initial value load
     if (widget.initialValue != null) {
       _dropDownList = List.from(widget.dropDownList);
       if (widget.isMultiSelection) {
         for (int i = 0; i < widget.initialValue.length; i++) {
-          var index = _dropDownList.indexWhere((element) =>
-              element.name.trim() == widget.initialValue[i].trim());
+          var index = _dropDownList.indexWhere((element) {
+            if (widget.initialBasedOnValue) {
+              if (element.value.trim() == widget.initialValue[i].trim()) {
+                initialValueName.add(element.name.trim());
+                return true;
+              } else
+                return false;
+            } else
+              return element.name.trim() == widget.initialValue[i].trim();
+          });
           if (index != -1) {
             _multiSelectionValue[index] = true;
           }
@@ -347,7 +360,9 @@ class _DropDownTextFieldState extends State<DropDownTextField>
         _cnt.text = (count == 0
             ? ""
             : widget.displayCompleteItem
-                ? widget.initialValue.join(",")
+                ? widget.initialBasedOnValue
+                    ? initialValueName.join(",")
+                    : widget.initialValue.join(",")
                 : "$count item selected");
       } else {
         var index = _dropDownList.indexWhere(
@@ -771,6 +786,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                       autoSort: !widget.readOnly,
                       mainFocusNode: _textFieldFocusNode,
                       searchFocusNode: _searchFocusNode,
+                      initialBasedOnValue: widget.initialBasedOnValue,
                       enableSearch: widget.enableSearch,
                       height: _height,
                       listTileHeight: _listTileHeight,
@@ -815,6 +831,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                     )
                   : MultiSelection(
                       enableSearch: widget.enableSearch,
+                      initialBasedOnValue: widget.initialBasedOnValue,
                       buttonTextStyle: widget.submitButtonTextStyle,
                       buttonPadding: widget.submitButtonPadding,
                       buttonText: widget.submitButtonText,
@@ -877,6 +894,7 @@ class SingleSelection extends StatefulWidget {
       required this.dropDownList,
       required this.onChanged,
       required this.height,
+      this.initialBasedOnValue,
       required this.enableSearch,
       required this.searchHeight,
       required this.searchFocusNode,
@@ -898,6 +916,7 @@ class SingleSelection extends StatefulWidget {
   final ValueSetter onChanged;
   final double height;
   final double listTileHeight;
+  final bool? initialBasedOnValue;
   final bool enableSearch;
   final double searchHeight;
   final FocusNode searchFocusNode;
@@ -1061,6 +1080,7 @@ class MultiSelection extends StatefulWidget {
       this.searchKeyboardType,
       required this.searchAutofocus,
       this.onSearchTap,
+      this.initialBasedOnValue,
       required this.enableSearch,
       this.onSearchSubmit,
       this.searchShowCursor,
@@ -1079,7 +1099,7 @@ class MultiSelection extends StatefulWidget {
   final ValueSetter onChanged;
   final List<bool> list;
   final double height;
-
+  final bool? initialBasedOnValue;
   final bool enableSearch;
   final double searchHeight = 60;
   final FocusNode searchFocusNode;
