@@ -361,8 +361,8 @@ class _DropDownTextFieldState extends State<DropDownTextField>
             ? ""
             : widget.displayCompleteItem
                 ? widget.initialBasedOnValue
-                    ? initialValueName.join(",")
-                    : widget.initialValue.join(",")
+                    ? initialValueName.join(", ")
+                    : widget.initialValue.join(", ")
                 : "$count item selected");
       } else {
         var index = _dropDownList.indexWhere(
@@ -443,7 +443,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
             _cnt.text = (count == 0
                 ? ""
                 : widget.displayCompleteItem
-                    ? widget.initialValue.join(",")
+                    ? widget.initialValue.join(", ")
                     : "$count item selected");
           } else {
             _multiSelectionValue = [];
@@ -864,7 +864,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                         _cnt.text = (count == 0
                             ? ""
                             : widget.displayCompleteItem
-                                ? completeList.join(",")
+                                ? completeList.join(", ")
                                 : "$count item selected");
                         if (widget.multiController != null) {
                           widget.multiController!
