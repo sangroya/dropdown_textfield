@@ -423,6 +423,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           if (oldWidget != null &&
               oldWidget.multiController!.dropDownValueList != null) {}
           if (widget.multiController!.dropDownValueList != null) {
+            List<String> displayItemName = [];
             _multiSelectionValue = [];
             for (int i = 0; i < _dropDownList.length; i++) {
               _multiSelectionValue.add(false);
@@ -434,6 +435,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                   element == widget.multiController!.dropDownValueList![i]);
               if (index != -1) {
                 _multiSelectionValue[index] = true;
+                displayItemName.add(widget.multiController!.dropDownValueList![i].name);
               }
             }
             int count = _multiSelectionValue
@@ -443,7 +445,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
             _cnt.text = (count == 0
                 ? ""
                 : widget.displayCompleteItem
-                    ? widget.initialValue.join(", ")
+                    ? displayItemName.join(", ")
                     : "$count item selected");
           } else {
             _multiSelectionValue = [];
