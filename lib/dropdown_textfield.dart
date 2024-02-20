@@ -561,7 +561,9 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                 widget.validator != null ? widget.validator!(value) : null,
             decoration: widget.textFieldDecoration != null
                 ? widget.textFieldDecoration!.copyWith(
-                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption)
+                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption || (widget.singleController?.dropDownValue == null &&
+                                widget.multiController?.dropDownValueList ==
+                                    null))
                         ? Icon(
                             widget.dropDownIconProperty?.icon ??
                                 Icons.arrow_drop_down_outlined,
