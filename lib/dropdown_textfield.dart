@@ -583,7 +583,9 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     hintText: _hintText,
                     hintStyle: const TextStyle(fontWeight: FontWeight.normal),
-                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption)
+                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption || (widget.singleController?.dropDownValue == null &&
+                                widget.multiController?.dropDownValueList ==
+                                    null))
                         ? Icon(
                             widget.dropDownIconProperty?.icon ??
                                 Icons.arrow_drop_down_outlined,
