@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:dropdown_textfield/single_selction.dart';
+import 'package:dropdown_textfield/single_selection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -62,6 +62,7 @@ class DropDownTextField extends StatefulWidget {
       this.validator,
       this.isEnabled = true,
       this.enableSearch = false,
+      this.initialBasedOnValue = false,
       this.readOnly = true,
       this.dropdownRadius = 12,
       this.textFieldDecoration,
@@ -100,6 +101,7 @@ class DropDownTextField extends StatefulWidget {
         submitButtonColor = null,
         submitButtonText = null,
         submitButtonTextStyle = null,
+        submitButtonPadding = null,
         super(key: key);
   const DropDownTextField.multiSelection(
       {Key? key,
@@ -111,6 +113,8 @@ class DropDownTextField extends StatefulWidget {
       this.textStyle,
       this.onChanged,
       this.validator,
+      required this.enableSearch,
+      this.initialBasedOnValue = false,
       this.isEnabled = true,
       this.dropdownRadius = 12,
       this.dropDownIconProperty,
@@ -124,6 +128,7 @@ class DropDownTextField extends StatefulWidget {
       this.submitButtonColor,
       this.submitButtonText,
       this.submitButtonTextStyle,
+      this.submitButtonPadding,
       this.listPadding,
       this.listTextStyle,
       this.checkBoxProperty,
@@ -137,7 +142,6 @@ class DropDownTextField extends StatefulWidget {
         ),
         multiController = controller,
         isMultiSelection = true,
-        enableSearch = false,
         readOnly = true,
         searchTextStyle = null,
         searchAutofocus = false,
@@ -190,6 +194,8 @@ class DropDownTextField extends StatefulWidget {
   final bool isEnabled;
 
   final FormFieldValidator<String>? validator;
+  // if you want to make the selection for initial value based on the value instead of name then set it true
+  final initialBasedOnValue;
 
   ///by setting enableSearch=true enable search option in dropdown,as of now this feature enabled only for single selection dropdown
   final bool enableSearch;
@@ -239,6 +245,8 @@ class DropDownTextField extends StatefulWidget {
 
   ///multi dropdown submit button text style
   final TextStyle? submitButtonTextStyle;
+
+  final EdgeInsets? submitButtonPadding;
 
   ///dropdown list item text style
   final TextStyle? listTextStyle;
@@ -319,7 +327,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           !_textFieldFocusNode.hasFocus &&
           _isExpanded) {
         _isExpanded = !_isExpanded;
-        hideOverlay();
+        if (!widget.isMultiSelection) hideOverlay();
         if (!widget.readOnly &&
             widget.singleController?.dropDownValue?.name != _cnt.text) {
           setState(() {
@@ -342,13 +350,24 @@ class _DropDownTextFieldState extends State<DropDownTextField>
       _multiSelectionValue.add(false);
     }
 
+    List<String> initialValueName = [];
+
     ///initial value load
     if (widget.initialValue != null) {
       _dropDownList = List.from(widget.dropDownList);
       if (widget.isMultiSelection) {
         for (int i = 0; i < widget.initialValue.length; i++) {
-          var index = _dropDownList.indexWhere((element) =>
-              element.name.trim() == widget.initialValue[i].trim());
+          var index = _dropDownList.indexWhere((element) {
+            if (widget.initialBasedOnValue) {
+              if (element.value.trim() == widget.initialValue[i].trim()) {
+                initialValueName.add(element.name.trim());
+                return true;
+              } else
+                return false;
+            } else
+              return element.name.trim() == widget.initialValue[i].trim();
+          });
+
           if (index != -1) {
             _multiSelectionValue[index] = true;
           }
@@ -359,7 +378,9 @@ class _DropDownTextFieldState extends State<DropDownTextField>
         _cnt.text = (count == 0
             ? ""
             : widget.displayCompleteItem
-                ? (widget.initialValue ?? []).join(",")
+                ? widget.initialBasedOnValue
+                    ? initialValueName.join(", ")
+                    : widget.initialValue.join(", ")
                 : "$count item selected");
       } else {
         var index = _dropDownList.indexWhere(
@@ -421,6 +442,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           if (oldWidget != null &&
               oldWidget.multiController?.dropDownValueList != null) {}
           if (widget.multiController?.dropDownValueList != null) {
+            List<String> displayItemName = [];
             _multiSelectionValue = [];
             for (int i = 0; i < _dropDownList.length; i++) {
               _multiSelectionValue.add(false);
@@ -432,6 +454,8 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                   element == widget.multiController!.dropDownValueList![i]);
               if (index != -1) {
                 _multiSelectionValue[index] = true;
+                displayItemName
+                    .add(widget.multiController!.dropDownValueList![i].name);
               }
             }
 
@@ -448,7 +472,8 @@ class _DropDownTextFieldState extends State<DropDownTextField>
               _cnt.text = (count == 0
                   ? ""
                   : widget.displayCompleteItem
-                      ? names.join(",")
+                      ? displayItemName.join(", ")
+                      //king ? names.join(",")
                       : "$count item selected");
             }
           } else {
@@ -586,7 +611,11 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                 widget.validator != null ? widget.validator!(value) : null,
             decoration: widget.textFieldDecoration != null
                 ? widget.textFieldDecoration!.copyWith(
-                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption)
+                    suffixIcon: (_cnt.text.isEmpty ||
+                            !widget.clearOption ||
+                            (widget.singleController?.dropDownValue == null &&
+                                widget.multiController?.dropDownValueList ==
+                                    null))
                         ? Icon(
                             widget.dropDownIconProperty?.icon ??
                                 Icons.arrow_drop_down_outlined,
@@ -608,7 +637,11 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     hintText: _hintText,
                     hintStyle: const TextStyle(fontWeight: FontWeight.normal),
-                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption)
+                    suffixIcon: (_cnt.text.isEmpty ||
+                            !widget.clearOption ||
+                            (widget.singleController?.dropDownValue == null &&
+                                widget.multiController?.dropDownValueList ==
+                                    null))
                         ? Icon(
                             widget.dropDownIconProperty?.icon ??
                                 Icons.arrow_drop_down_outlined,
@@ -818,6 +851,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                         mainFocusNode: _textFieldFocusNode,
                         searchTextStyle: widget.searchTextStyle,
                         searchFocusNode: _searchFocusNode,
+                        initialBasedOnValue: widget.initialBasedOnValue,
                         enableSearch: widget.enableSearch,
                         height: _height,
                         listTileHeight: _listTileHeight,
@@ -861,6 +895,12 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                         clearIconProperty: widget.clearIconProperty,
                       )
                     : MultiSelection(
+                        enableSearch: widget.enableSearch,
+                        initialBasedOnValue: widget.initialBasedOnValue,
+                        buttonPadding: widget.submitButtonPadding,
+                        mainFocusNode: _textFieldFocusNode,
+                        searchFocusNode: _searchFocusNode,
+                        searchAutofocus: _searchAutofocus,
                         buttonTextStyle: widget.submitButtonTextStyle,
                         buttonText: widget.submitButtonText,
                         buttonColor: widget.submitButtonColor,
@@ -891,7 +931,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                           _cnt.text = (count == 0
                               ? ""
                               : widget.displayCompleteItem
-                                  ? completeList.join(",")
+                                  ? completeList.join(", ")
                                   : "$count item selected");
                           if (widget.multiController != null) {
                             widget.multiController!
@@ -1056,4 +1096,15 @@ class _KeyboardVisibilityBuilderState extends State<KeyboardVisibilityBuilder>
         context,
         _isKeyboardVisible,
       );
+}
+
+class DropdownItem {
+  DropDownValueModel value;
+  bool isSelected;
+  int originalIndex;
+
+  DropdownItem(
+      {required this.value,
+      this.isSelected = false,
+      required this.originalIndex});
 }

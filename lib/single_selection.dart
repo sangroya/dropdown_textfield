@@ -5,6 +5,7 @@ import 'dropdown_textfield.dart';
 class SingleSelection extends StatefulWidget {
   const SingleSelection(
       {Key? key,
+      this.initialBasedOnValue,
       required this.dropDownList,
       required this.onChanged,
       required this.height,
@@ -26,6 +27,8 @@ class SingleSelection extends StatefulWidget {
       required this.listPadding,
       this.clearIconProperty})
       : super(key: key);
+
+  final bool? initialBasedOnValue;
   final List<DropDownValueModel> dropDownList;
   final ValueSetter onChanged;
   final double height;

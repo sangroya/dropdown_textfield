@@ -170,6 +170,9 @@ class _TestPageState extends State<TestPage> {
                   height: 20,
                 ),
                 DropDownTextField.multiSelection(
+                  enableSearch: true,
+
+                  submitButtonPadding: EdgeInsets.all(8.0),
                   controller: _cntMulti,
                   // initialValue: const ["name1", "name2", "name8", "name3"],
                   // displayCompleteItem: true,
