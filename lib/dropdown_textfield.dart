@@ -78,7 +78,8 @@ class DropDownTextField extends StatefulWidget {
       this.listPadding,
       this.listTextStyle,
       this.keyboardType,
-      this.autovalidateMode})
+      this.autovalidateMode,
+      this.multiLineItems = false})
       : assert(
           !(initialValue != null && controller != null),
           "you cannot add both initialValue and singleController,\nset initial value using controller \n\tEg: SingleValueDropDownController(data:initial value) ",
@@ -126,6 +127,7 @@ class DropDownTextField extends StatefulWidget {
       this.submitButtonText,
       this.submitButtonTextStyle,
       this.submitButtonPadding,
+      this.multiLineItems = false,
       this.listPadding,
       this.listTextStyle,
       this.checkBoxProperty,
@@ -147,6 +149,7 @@ class DropDownTextField extends StatefulWidget {
         searchDecoration = null,
         keyboardType = null,
         // keyboardHeight = 0,
+
         super(key: key);
 
   ///single and multiple dropdown controller.
@@ -235,6 +238,9 @@ class DropDownTextField extends StatefulWidget {
   ///multi dropdown submit button text
   final String? submitButtonText;
 
+  //make item multi line
+  final bool multiLineItems;
+
   ///multi dropdown submit button color
   final Color? submitButtonColor;
 
@@ -289,6 +295,8 @@ class _DropDownTextFieldState extends State<DropDownTextField>
   late double _keyboardHeight;
   late TextStyle _listTileTextStyle;
   late ListPadding _listPadding;
+  GlobalKey overlayKey = GlobalKey();
+
   @override
   void initState() {
     _cnt = TextEditingController();
@@ -320,7 +328,8 @@ class _DropDownTextFieldState extends State<DropDownTextField>
           !_textFieldFocusNode.hasFocus &&
           _isExpanded) {
         _isExpanded = !_isExpanded;
-        if (!widget.isMultiSelection) hideOverlay();
+        // if (!widget.isMultiSelection) hideOverlay();
+        hideOverlay();
         if (!widget.readOnly &&
             widget.singleController?.dropDownValue?.name != _cnt.text) {
           setState(() {
@@ -435,7 +444,8 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                   element == widget.multiController!.dropDownValueList![i]);
               if (index != -1) {
                 _multiSelectionValue[index] = true;
-                displayItemName.add(widget.multiController!.dropDownValueList![i].name);
+                displayItemName
+                    .add(widget.multiController!.dropDownValueList![i].name);
               }
             }
             int count = _multiSelectionValue
@@ -557,11 +567,29 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                 if (widget.readOnly) hideOverlay();
               }
             },
+            onTapOutside: (event) {
+              final RenderBox renderBox =
+                  overlayKey.currentContext?.findRenderObject() as RenderBox;
+              final overlayPosition = renderBox.localToGlobal(Offset.zero);
+              final overlaySize = renderBox.size;
+              bool isOverlayTap = (overlayPosition.dx <= event.position.dx &&
+                      event.position.dx <=
+                          overlayPosition.dx + overlaySize.width) &&
+                  (overlayPosition.dy <= event.position.dy &&
+                      event.position.dy <=
+                          overlayPosition.dy + overlaySize.height);
+
+              if (!isOverlayTap) {
+                _textFieldFocusNode.unfocus();
+              }
+            },
             validator: (value) =>
                 widget.validator != null ? widget.validator!(value) : null,
             decoration: widget.textFieldDecoration != null
                 ? widget.textFieldDecoration!.copyWith(
-                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption || (widget.singleController?.dropDownValue == null &&
+                    suffixIcon: (_cnt.text.isEmpty ||
+                            !widget.clearOption ||
+                            (widget.singleController?.dropDownValue == null &&
                                 widget.multiController?.dropDownValueList ==
                                     null))
                         ? Icon(
@@ -585,7 +613,9 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     hintText: _hintText,
                     hintStyle: const TextStyle(fontWeight: FontWeight.normal),
-                    suffixIcon: (_cnt.text.isEmpty || !widget.clearOption || (widget.singleController?.dropDownValue == null &&
+                    suffixIcon: (_cnt.text.isEmpty ||
+                            !widget.clearOption ||
+                            (widget.singleController?.dropDownValue == null &&
                                 widget.multiController?.dropDownValueList ==
                                     null))
                         ? Icon(
@@ -771,6 +801,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
       child: Align(
         heightFactor: _heightFactor.value,
         child: Material(
+          key: overlayKey,
           color: Colors.transparent,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
@@ -794,6 +825,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                       searchFocusNode: _searchFocusNode,
                       initialBasedOnValue: widget.initialBasedOnValue,
                       enableSearch: widget.enableSearch,
+                      multiLineItems: widget.multiLineItems,
                       height: _height,
                       listTileHeight: _listTileHeight,
                       dropDownList: _dropDownList,
@@ -837,6 +869,7 @@ class _DropDownTextFieldState extends State<DropDownTextField>
                     )
                   : MultiSelection(
                       enableSearch: widget.enableSearch,
+                      multiLineItems: widget.multiLineItems,
                       initialBasedOnValue: widget.initialBasedOnValue,
                       buttonTextStyle: widget.submitButtonTextStyle,
                       buttonPadding: widget.submitButtonPadding,
@@ -902,6 +935,7 @@ class SingleSelection extends StatefulWidget {
       required this.height,
       this.initialBasedOnValue,
       required this.enableSearch,
+      required this.multiLineItems,
       required this.searchHeight,
       required this.searchFocusNode,
       required this.mainFocusNode,
@@ -921,9 +955,10 @@ class SingleSelection extends StatefulWidget {
   final List<DropDownValueModel> dropDownList;
   final ValueSetter onChanged;
   final double height;
-  final double listTileHeight;
+  final double? listTileHeight;
   final bool? initialBasedOnValue;
   final bool enableSearch;
+  final bool multiLineItems;
   final double searchHeight;
   final FocusNode searchFocusNode;
   final FocusNode mainFocusNode;
@@ -1044,25 +1079,20 @@ class _SingleSelectionState extends State<SingleSelection> {
               padding: EdgeInsets.zero,
               itemCount: newDropDownList.length,
               itemBuilder: (BuildContext context, int index) {
-                return InkWell(
-                  onTap: () {
-                    widget.onChanged(newDropDownList[index]);
-                  },
-                  child: Container(
-                    width: double.infinity,
+                return SizedBox(
+                  height: widget.multiLineItems ? null : widget.listTileHeight,
+                  child: Padding(
                     padding: EdgeInsets.only(
-                        left: 10,
                         right: 10,
+                        left: 10,
                         bottom: widget.listPadding.bottom,
                         top: widget.listPadding.top),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FittedBox(
-                        fit: BoxFit.fitHeight,
+                    child: InkWell(
+                        onTap: () {
+                          widget.onChanged(newDropDownList[index]);
+                        },
                         child: Text(newDropDownList[index].name,
-                            style: widget.listTextStyle),
-                      ),
-                    ),
+                            maxLines: 2, style: widget.listTextStyle)),
                   ),
                 );
               },
@@ -1088,6 +1118,7 @@ class MultiSelection extends StatefulWidget {
       this.onSearchTap,
       this.initialBasedOnValue,
       required this.enableSearch,
+      required this.multiLineItems,
       this.onSearchSubmit,
       this.searchShowCursor,
       this.searchDecoration,
@@ -1107,6 +1138,7 @@ class MultiSelection extends StatefulWidget {
   final double height;
   final bool? initialBasedOnValue;
   final bool enableSearch;
+  final bool multiLineItems;
   final double searchHeight = 60;
   final FocusNode searchFocusNode;
   final FocusNode mainFocusNode;
@@ -1122,7 +1154,7 @@ class MultiSelection extends StatefulWidget {
   final String? buttonText;
   final EdgeInsets? buttonPadding;
   final TextStyle? buttonTextStyle;
-  final double listTileHeight;
+  final double? listTileHeight;
   final TextStyle? listTextStyle;
   final ListPadding listPadding;
   final CheckBoxProperty? checkBoxProperty;
@@ -1248,7 +1280,9 @@ class _MultiSelectionState extends State<MultiSelection> {
                         });
                       },
                       child: SizedBox(
-                        height: widget.listTileHeight,
+                        height: widget.multiLineItems
+                            ? null
+                            : widget.listTileHeight,
                         child: Padding(
                           padding: EdgeInsets.only(
                               bottom: widget.listPadding.bottom,
@@ -1333,7 +1367,9 @@ class _MultiSelectionState extends State<MultiSelection> {
               child: InkWell(
                 onTap: () => widget.onChanged(multiSelectionValue),
                 child: Container(
-                  height: widget.listTileHeight * 0.9,
+                  height: widget.listTileHeight == null
+                      ? 20
+                      : widget.listTileHeight! * 0.9,
                   padding:
                       const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12),
                   decoration: BoxDecoration(
