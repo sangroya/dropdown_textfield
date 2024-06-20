@@ -72,6 +72,7 @@ class _TestPageState extends State<TestPage> {
                 ),
                 DropDownTextField(
                   // initialValue: "name4",
+                  multiLineItems: true,
                   controller: _cnt,
                   clearOption: true,
                   enableSearch: true,
@@ -90,7 +91,8 @@ class _TestPageState extends State<TestPage> {
                   dropDownList: const [
                     DropDownValueModel(name: 'name1', value: "value1"),
                     DropDownValueModel(
-                        name: 'name2',
+                        name:
+                            'DropDownButton is a widget that we can use to select one unique value from a set of values',
                         value: "value2",
                         toolTipMsg:
                             "DropDownButton is a widget that we can use to select one unique value from a set of values"),
@@ -104,6 +106,18 @@ class _TestPageState extends State<TestPage> {
                     DropDownValueModel(name: 'name6', value: "value6"),
                     DropDownValueModel(name: 'name7', value: "value7"),
                     DropDownValueModel(name: 'name8', value: "value8"),
+                    DropDownValueModel(name: 'name15', value: "value15"),
+                    DropDownValueModel(name: 'name16', value: "value16"),
+                    DropDownValueModel(name: 'name17', value: "value17"),
+                    DropDownValueModel(name: 'name18', value: "value18"),
+                    DropDownValueModel(name: 'name25', value: "value15"),
+                    DropDownValueModel(name: 'name26', value: "value16"),
+                    DropDownValueModel(name: 'name27', value: "value17"),
+                    DropDownValueModel(name: 'name28', value: "value18"),
+                    DropDownValueModel(name: 'name35', value: "value15"),
+                    DropDownValueModel(name: 'name36', value: "value16"),
+                    DropDownValueModel(name: 'name37', value: "value17"),
+                    DropDownValueModel(name: 'name38', value: "value18"),
                   ],
                   onChanged: (val) {},
                 ),
@@ -157,6 +171,7 @@ class _TestPageState extends State<TestPage> {
                   height: 20,
                 ),
                 DropDownTextField.multiSelection(
+                  multiLineItems: true,
                   // controller: _cntMulti,
                   enableSearch: true,
                   submitButtonPadding: EdgeInsets.all(8.0),
@@ -164,7 +179,8 @@ class _TestPageState extends State<TestPage> {
                   dropDownList: const [
                     DropDownValueModel(name: 'name1', value: "value1"),
                     DropDownValueModel(
-                        name: 'name2',
+                        name:
+                            'DropDownButton is a widget that we can use to select one unique value from a set of values',
                         value: "value2",
                         toolTipMsg:
                             "DropDownButton is a widget that we can use to select one unique value from a set of values"),
